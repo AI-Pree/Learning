@@ -1,21 +1,44 @@
 import operator
 import sys
 
-def change(ops:str,value:str)->str: return str(-int(value))
+ops = {"+":1, "-":1, "*" : 2, "/": 2, "(":4, ")":4,"change":3}
+def change(ops:str,value:str)->str: return str(-float(value))
 
 def evaluate(ops:str,first = None,second = None)->str:
     op = {"+":operator.__add__,
           "-":operator.__sub__,
           "*":operator.__mul__,
-          "/":operator.__div__,
+          "/":operator.__truediv__,
           "change":change(ops,first)}
     if ops == "change":
         return op[ops]
-    return str(op[ops](int(first),int(second)))
+    return str(op[ops](float(first),float(second)))
 
+
+#---------------------------------------------------------------------------#
+# ----------------------------postfix-evalutate-----------------------------#
+#---------------------------------------------------------------------------#
+def postFixEval(pf:list)->str:
+        numbers_stack = []
+        result = 0
+        index = 0
+        while index < len(pf):
+            if pf[index].lstrip('-').isdigit():
+                numbers_stack.append(pf[index])
+            elif pf[index] in ops:                
+                if pf[index] == "change":
+                    result = evaluate(pf[index], numbers_stack[-1])
+                else:
+                    result = evaluate(pf[index],numbers_stack[-2],numbers_stack[-1])
+                if pf[index] == "change":
+                    del numbers_stack[-1:-2:-1]
+                else:
+                    del numbers_stack[-1:-3:-1]
+                numbers_stack.append(result)
+            index += 1
+        return numbers_stack[0]
 
 def calc(expression):
-    ops = {"+":1, "-":1, "*" : 2, "/": 2, "(":4, ")":4,"change":3}
     simp = "+-"
     op_stack = []
     exp = expression.replace(" ","")
@@ -79,7 +102,6 @@ def calc(expression):
                 s = len(op_stack)-1
                 print("s is", s)
                 while op_stack[s] != "(":
-
                     print("s here is:", s)
                     postfix.append(op_stack.pop())
                     s -= 1
@@ -93,25 +115,26 @@ def calc(expression):
         
     print("postfix:",postfix)
     print("op_stack:",op_stack)
-    return postfix  #for test
-    #---------------------------------------------------------------------------#
-    # ----------------------------postfix-evalutate-----------------------------#
-    #---------------------------------------------------------------------------#
-    
+    return float(postFixEval(postfix))
+print(calc("-(-(-(-1)))"))
+ 
+'''
 
 def test():
-    assert calc("-53 - -74 - 73 / -88 + 94 / 71 / 64 - 48") == ['-53','-74','-','73','-88','/','-','94','71','/','64','/','+','48','-']
-    assert calc("2 + -2") == ['2','-2','+']
-    assert calc("(((10)))") == ['10']
-    assert calc("10- 2- -5") == ['10','2','-','-5','-']
-
-    assert calc("1 + 2 * 3 * (5 - (3 - 1)) - 8") == ['1', '2', '3', '*', '5', '3', '1', '-', '-', '*', '+', '8', '-']
+    #assert calc("-53 - -74 - 73 / -88 + 94 / 71 / 64 - 48") == ['-53','-74','-','73','-88','/','-','94','71','/','64','/','+','48','-']
+    assert calc("2 + -2") == 0.0
+    assert calc("(((10)))") == 10.0
+    assert calc("10- 2- -5") == 13.0
+    assert calc("-(-(-(-1)))") == 1.0
+    #assert calc("1 + 2 * 3 * (5 - (3 - 1)) - 8") == ['1', '2', '3', '*', '5', '3', '1', '-', '-', '*', '+', '8', '-']
 
 try:
     test()
     print("------------------All test ran successfully------------")
 except:
-    print("-------------------There is error----------------------")
+    print("-------------------There is an error----------------------")
+'''
+
 '''
 (((10)))
 2 + -2
