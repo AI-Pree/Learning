@@ -42,8 +42,6 @@ def calc(expression):
     simp = "+-"
     op_stack = []
     exp = expression.replace(" ","")
-
-    print(exp)
     length = len(exp)
     postfix = []
     number = ""
@@ -53,7 +51,6 @@ def calc(expression):
     # -------------------------infix to postfix conversion----------------------#
     #---------------------------------------------------------------------------#
     while(i < length):
-        
         if exp[i].isdigit():
             number = exp[i]
             if i <= length - 1:
@@ -67,9 +64,15 @@ def calc(expression):
                 i += 1
 
         elif exp[i] in simp and i >= 0:
+            print("index here is ", i)
             check = exp[i] if i == 0 else exp[i-1] #checking for the postion of the numeber if its negative
+            print("check here is", check)
             if check in ops:
-                if i != 0 and exp[i-1] in ops and exp[i+1] == "(":
+                if i == 0 and exp[i+1] == "(":
+                    op_stack.append("change")
+                    i+=1 
+
+                elif not exp[i-1] == ")" and exp[i+1] == "(": #made changes here ----------------------------------------------> i != 0 and
                     op_stack.append("change")
                     i += 1
                 elif check != ")":
@@ -80,19 +83,17 @@ def calc(expression):
                         else:
                             break
                     postfix.append(number)
-                    
                     i = x
         
-
         if i < length and exp[i] in ops:
             print("opstack: ",op_stack)
             print("my operator is", ops[exp[i]] )
             if exp[i] != ")": 
                 if op_stack:
                     for m in range(len(op_stack)-1,-1,-1):
-                        if not op_stack[m] in ["change", "("] and  ops[op_stack[m]] >= ops[exp[i]]:
-                            print("op_stack:",op_stack)
-                            print("popping here", op_stack[-1],"to", exp[i])
+                        if not op_stack[m] in ["change", "("] and ops[op_stack[m]] >= ops[exp[i]]:
+                            postfix.append(op_stack.pop())
+                        elif op_stack[m] == "change" and ops[op_stack[m]] >= ops[exp[i]]:
                             postfix.append(op_stack.pop())
                         else:
                             break
@@ -100,32 +101,27 @@ def calc(expression):
             
             elif exp[i] == ")":
                 s = len(op_stack)-1
-                print("s is", s)
                 while op_stack[s] != "(":
-                    print("s here is:", s)
                     postfix.append(op_stack.pop())
                     s -= 1
                 op_stack.pop()
         i += 1
-        print("postfix: ",postfix)
 
     #clearing the remaining opertors in the op_stack
     while op_stack:
         postfix.append(op_stack.pop())
-        
-    print("postfix:",postfix)
-    print("op_stack:",op_stack)
+
     return float(postFixEval(postfix))
-print(calc("-(-(-(-1)))"))
- 
-'''
 
 def test():
     #assert calc("-53 - -74 - 73 / -88 + 94 / 71 / 64 - 48") == ['-53','-74','-','73','-88','/','-','94','71','/','64','/','+','48','-']
-    assert calc("2 + -2") == 0.0
-    assert calc("(((10)))") == 10.0
-    assert calc("10- 2- -5") == 13.0
+    #assert calc("2 + -2") == 0.0
+    #assert calc("(((10)))") == 10.0
+    #assert calc("10- 2- -5") == 13.0
     assert calc("-(-(-(-1)))") == 1.0
+    #assert calc("(76)-(-50--51*-(95))*(69*-(((-(-43+-9))))/-58)") == 76.0
+    assert calc("(-20)+(-22+-4*-(12))+(-31-(((-(57+-64))))*24)") == -193.0
+    assert calc("-(-74)+(59-61*-(20))-(57+-(((-(30+-7))))*57)") == -15.0
     #assert calc("1 + 2 * 3 * (5 - (3 - 1)) - 8") == ['1', '2', '3', '*', '5', '3', '1', '-', '-', '*', '+', '8', '-']
 
 try:
@@ -133,9 +129,11 @@ try:
     print("------------------All test ran successfully------------")
 except:
     print("-------------------There is an error----------------------")
-'''
+
 
 '''
+(-20)+(-22+-4*-(12))+(-31-(((-(57+-64))))*24)
+(76)-(-50--51*-(95))*(69*-(((-(-43+-9))))/-58)
 (((10)))
 2 + -2
 1 + 2 * 3 * (5 - (3 - 1)) - 8

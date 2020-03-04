@@ -1,8 +1,6 @@
+import operator
 
-def need():
-    return hell()
-
-def hell():
-    return 1
-
-print(need())
+t = "12"
+p = "17"
+r = operator.truediv(float(t),float(p))
+print(r)
